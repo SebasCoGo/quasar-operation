@@ -3,42 +3,38 @@ package com.quasaroperation.service.impl;
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
 import com.quasaroperation.model.Position;
+import com.quasaroperation.service.PropertiesService;
 import com.quasaroperation.service.LocationService;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.yaml.snakeyaml.util.ArrayUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Service
 public class LocationServiceImpl implements LocationService {
 
-    @Value("${kenobi.position}")
-    private double[] KENOBI_POSITION;
+    @Autowired
+    PropertiesService propertiesService;
 
-    @Value("${skywalker.position}")
-    private double[] SKYWALKER_POSITION;
-
-    @Value("${sato.position}")
-    private double[] SATO_POSITION;
+    @Autowired
+    private Environment environment;
 
     @Override
     public Position getLocation(List<Double> distances) {
-        double[][] positions = new double[][]{KENOBI_POSITION, SKYWALKER_POSITION, SATO_POSITION};
-        double[] distancesArray = distances.stream().mapToDouble(d -> d).toArray();
         try {
+            double[][] positions = propertiesService.getDefaultSatellitePositions();
+            double[] distancesArray = distances.stream().mapToDouble(d -> d).toArray();
             NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(new TrilaterationFunction(positions, distancesArray), new LevenbergMarquardtOptimizer());
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
-
             double[] position = optimum.getPoint().toArray();
-
             return new Position(position[0], position[1]);
-        } catch (IllegalArgumentException e) {
-            //throw new LocationException("No hay suficiente información para calcular una posición.", e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, environment.getProperty("exception.location.error"));
         }
-        return null;
     }
-
 }
