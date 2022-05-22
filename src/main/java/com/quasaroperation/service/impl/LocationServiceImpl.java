@@ -19,11 +19,14 @@ import java.util.List;
 public class LocationServiceImpl implements LocationService {
 
     @Autowired
-    PropertiesService propertiesService;
+    private PropertiesService propertiesService;
 
     @Autowired
     private Environment environment;
 
+    /**
+     * @see LocationService#getLocation(List)
+     */
     @Override
     public Position getLocation(List<Double> distances) {
         try {
@@ -34,7 +37,7 @@ public class LocationServiceImpl implements LocationService {
             double[] position = optimum.getPoint().toArray();
             return new Position(position[0], position[1]);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, environment.getProperty("exception.location.error"));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, environment.getProperty("exception.location.error"));
         }
     }
 }

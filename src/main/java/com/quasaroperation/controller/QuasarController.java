@@ -18,16 +18,16 @@ import java.util.stream.Collectors;
 public class QuasarController {
 
     @Autowired
-    LocationService locationService;
+    private LocationService locationService;
 
     @Autowired
-    MessageService messageService;
+    private MessageService messageService;
 
     @Autowired
-    SatelliteService satelliteService;
+    private SatelliteService satelliteService;
 
     @Autowired
-    PropertiesService propertiesService;
+    private PropertiesService propertiesService;
 
     @Autowired
     private Environment environment;
@@ -35,22 +35,23 @@ public class QuasarController {
     @PostMapping("/topsecret")
     public ResponseEntity<?> topSecret(@RequestBody SatelliteListRequest satelliteListRequest) {
         SpaceshipResponse spaceshipResponse = new SpaceshipResponse();
-        List<String> satelliteRequestNames = satelliteListRequest.getSatellites().stream().map(Satellite::getName).collect(Collectors.toList());
         List<String> defaultSatelliteNames = propertiesService.getDefaultSatelliteNames();
-        satelliteRequestNames.retainAll(defaultSatelliteNames);
-        if (satelliteRequestNames.size() == defaultSatelliteNames.size()) {
-            satelliteListRequest.getSatellites().sort(Comparator.comparing(Satellite::getName));
-            spaceshipResponse.setPosition(locationService.getLocation(satelliteListRequest.getSatellites().stream().map(Satellite::getDistance).collect(Collectors.toList())));
-            spaceshipResponse.setMessage(messageService.getMessage(satelliteListRequest.getSatellites().stream().map(Satellite::getMessage).collect(Collectors.toList())));
-            return ResponseEntity.ok().body(spaceshipResponse);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(environment.getProperty("satellite.not-found.error"));
+        List<Satellite> satellitesRequestFiltered = satelliteListRequest.getSatellites().stream()
+                .filter(s -> defaultSatelliteNames.contains(s.getName())).collect(Collectors.toList());
+        if (!satellitesRequestFiltered.stream().map(Satellite::getName)
+                .collect(Collectors.toList()).stream().allMatch(new HashSet<>()::add)) {
+            return getResponseError(environment.getProperty("satellite.duplicated.error"));
         }
-
+        if (defaultSatelliteNames.size() == satellitesRequestFiltered.size()) {
+            return getResponseEntity(spaceshipResponse, satellitesRequestFiltered);
+        } else {
+            return getResponseError(environment.getProperty("satellite.not-found.error"));
+        }
     }
 
     @PostMapping("/topsecret_split/{satelliteName}")
-    public ResponseEntity<?> topSecretSplitPost(@PathVariable("satelliteName") String satelliteName, @RequestBody SatelliteRequest satelliteRequest) {
+    public ResponseEntity<?> topSecretSplitPost(@PathVariable("satelliteName") String satelliteName,
+                                                @RequestBody SatelliteRequest satelliteRequest) {
         Satellite satelliteModel = new Satellite();
         satelliteModel.setName(satelliteName);
         satelliteModel.setMessage(satelliteRequest.getMessage());
@@ -65,13 +66,23 @@ public class QuasarController {
         List<Satellite> satelliteModels = satelliteService.findAllByName(defaultSatelliteNames);
         SpaceshipResponse spaceshipResponse = new SpaceshipResponse();
         if (satelliteModels.size() == defaultSatelliteNames.size()) {
-            satelliteModels.sort(Comparator.comparing(Satellite::getName));
-            spaceshipResponse.setPosition(locationService.getLocation(Arrays.asList(satelliteModels.get(0).getDistance(), satelliteModels.get(1).getDistance(), satelliteModels.get(2).getDistance())));
-            spaceshipResponse.setMessage(messageService.getMessage(Arrays.asList(satelliteModels.get(0).getMessage(), satelliteModels.get(1).getMessage(), satelliteModels.get(2).getMessage())));
-            return ResponseEntity.ok().body(spaceshipResponse);
+            return getResponseEntity(spaceshipResponse, satelliteModels);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(environment.getProperty("satellite.insufficient.error"));
+            return getResponseError(environment.getProperty("satellite.insufficient.error"));
         }
+    }
+
+    private ResponseEntity<?> getResponseEntity(SpaceshipResponse spaceshipResponse, List<Satellite> satellitesInfo) {
+        satellitesInfo.sort(Comparator.comparing(Satellite::getName));
+        spaceshipResponse.setPosition(locationService.getLocation(satellitesInfo.stream().
+                map(Satellite::getDistance).collect(Collectors.toList())));
+        spaceshipResponse.setMessage(messageService.getMessage(satellitesInfo.stream().
+                map(Satellite::getMessage).collect(Collectors.toList())));
+        return ResponseEntity.ok().body(spaceshipResponse);
+    }
+
+    private ResponseEntity<?> getResponseError(String message) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
 
 }
