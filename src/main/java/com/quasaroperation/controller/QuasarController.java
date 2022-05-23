@@ -5,6 +5,7 @@ import com.quasaroperation.service.PropertiesService;
 import com.quasaroperation.service.LocationService;
 import com.quasaroperation.service.MessageService;
 import com.quasaroperation.service.SatelliteService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,7 @@ public class QuasarController {
     private Environment environment;
 
     @PostMapping("/topsecret")
+    @ApiOperation(value = "${api.topsecret.description}", response = SpaceshipResponse.class)
     public ResponseEntity<?> topSecret(@RequestBody SatelliteListRequest satelliteListRequest) {
         SpaceshipResponse spaceshipResponse = new SpaceshipResponse();
         List<String> defaultSatelliteNames = propertiesService.getDefaultSatelliteNames();
@@ -50,6 +52,7 @@ public class QuasarController {
     }
 
     @PostMapping("/topsecret_split/{satelliteName}")
+    @ApiOperation("${api.topsecret-split-post.description}")
     public ResponseEntity<?> topSecretSplitPost(@PathVariable("satelliteName") String satelliteName,
                                                 @RequestBody SatelliteRequest satelliteRequest) {
         Satellite satelliteModel = new Satellite();
@@ -61,6 +64,7 @@ public class QuasarController {
     }
 
     @GetMapping("/topsecret_split")
+    @ApiOperation(value = "${api.topsecret-split-get.description}", response = SpaceshipResponse.class)
     public ResponseEntity<?> topSecretSplitGet() {
         List<String> defaultSatelliteNames = propertiesService.getDefaultSatelliteNames();
         List<Satellite> satelliteModels = satelliteService.findAllByName(defaultSatelliteNames);
