@@ -13,4 +13,6 @@ public interface SatelliteService {
     Optional<Satellite> findByName(String name);
     Satellite save(Satellite satellite);
 
+    void deleteByName(String name);
+
 }

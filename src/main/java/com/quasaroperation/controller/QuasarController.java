@@ -45,7 +45,7 @@ public class QuasarController {
             return getResponseError(environment.getProperty("satellite.duplicated.error"));
         }
         if (defaultSatelliteNames.size() == satellitesRequestFiltered.size()) {
-            return getResponseEntity(spaceshipResponse, satellitesRequestFiltered);
+            return getResponseEntitySpaceship(spaceshipResponse, satellitesRequestFiltered);
         } else {
             return getResponseError(environment.getProperty("satellite.not-found.error"));
         }
@@ -60,7 +60,7 @@ public class QuasarController {
         satelliteModel.setMessage(satelliteRequest.getMessage());
         satelliteModel.setDistance(satelliteRequest.getDistance());
         satelliteService.save(satelliteModel);
-        return ResponseEntity.ok().body(environment.getProperty("satellite.saved-updated.message"));
+        return getResponseEntityOkMessage(environment.getProperty("satellite.saved-updated.message"));
     }
 
     @GetMapping("/topsecret_split")
@@ -70,19 +70,39 @@ public class QuasarController {
         List<Satellite> satelliteModels = satelliteService.findAllByName(defaultSatelliteNames);
         SpaceshipResponse spaceshipResponse = new SpaceshipResponse();
         if (satelliteModels.size() == defaultSatelliteNames.size()) {
-            return getResponseEntity(spaceshipResponse, satelliteModels);
+            return getResponseEntitySpaceship(spaceshipResponse, satelliteModels);
         } else {
             return getResponseError(environment.getProperty("satellite.insufficient.error"));
         }
     }
 
-    private ResponseEntity<?> getResponseEntity(SpaceshipResponse spaceshipResponse, List<Satellite> satellitesInfo) {
+    @GetMapping("/topsecret_split_find_all")
+    @ApiOperation(value = "${api.topsecret-split-find-all-description}")
+    public ResponseEntity<?> topSecretSplitFindAll() {
+        SatelliteResponse satellitesResponse = new SatelliteResponse();
+        List<Satellite> satellitesSaved = satelliteService.findAll();
+        satellitesResponse.setSatellites(satellitesSaved);
+        return ResponseEntity.ok().body(satellitesResponse);
+    }
+
+    @DeleteMapping("/topsecret_split_delete/{satelliteName}")
+    @ApiOperation(value = "${api.topsecret-split-delete.description}")
+    public ResponseEntity<?> topSecretSplitDelete(@PathVariable("satelliteName") String satelliteName) {
+        satelliteService.deleteByName(satelliteName);
+        return getResponseEntityOkMessage(environment.getProperty("satellite.deleted.message"));
+    }
+
+    private ResponseEntity<?> getResponseEntitySpaceship(SpaceshipResponse spaceshipResponse, List<Satellite> satellitesInfo) {
         satellitesInfo.sort(Comparator.comparing(Satellite::getName));
         spaceshipResponse.setPosition(locationService.getLocation(satellitesInfo.stream().
                 map(Satellite::getDistance).collect(Collectors.toList())));
         spaceshipResponse.setMessage(messageService.getMessage(satellitesInfo.stream().
                 map(Satellite::getMessage).collect(Collectors.toList())));
         return ResponseEntity.ok().body(spaceshipResponse);
+    }
+
+    private ResponseEntity<?> getResponseEntityOkMessage(String message) {
+        return ResponseEntity.ok().body(message);
     }
 
     private ResponseEntity<?> getResponseError(String message) {

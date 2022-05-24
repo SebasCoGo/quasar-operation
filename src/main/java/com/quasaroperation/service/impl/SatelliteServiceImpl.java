@@ -39,4 +39,9 @@ public class SatelliteServiceImpl implements SatelliteService {
     public Satellite save(Satellite satellite) {
         return satelliteRepository.save(satellite);
     }
+    @Override
+    @Transactional
+    public void deleteByName(String name){
+        satelliteRepository.deleteById(name);
+    }
 }
