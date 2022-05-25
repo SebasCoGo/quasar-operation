@@ -1,4 +1,4 @@
-package com.quasaroperation.Config;
+package com.quasaroperation.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
