@@ -247,3 +247,11 @@ El proyecto cuenta con pruebas unitarias de los services y el controller, estas 
 
 ● Test limpios: El funcionamiento del código de los métodos principales del servicio fue validado mediante pruebas unitarias
 
+## Autor
+### Sebastian Contreras Gómez
+✔ Email: sebascogo@gmail.com
+
+✔ Linkedin: https://www.linkedin.com/in/sebastian-contreras-g%C3%B3mez-5b7783183/
+
+✔ Tel: +57 3209933378
+
