@@ -20,7 +20,7 @@
 ✔ heroku: Rama para desplegar en Heroku usando BD PostgreSQL
 
 ## ¿Cómo ejecutar el programa?
-Para ejecutar el servicio de manera directa en la nube, usar los EndPoints y documentación de swagger descrita en la solución
+Para ejecutar el servicio de manera directa en la nube, usar los EndPoints y documentación de Swagger o importar la colección de Postman que se indica en la solución
 
 Para ejecutar el proyecto en maquina local:
 
@@ -56,10 +56,12 @@ El proyecto está dividido en cuatro capas principales:
 
 ✔ Model: Es la capa que contiene los modelos y los entities del servicio
 
-### Documentacion Swagger
-✔ Heroku: https://quasar-operation-challenge.herokuapp.com/swagger-ui.html
+### Documentacion Swagger y colección Postman para importar
+✔ Swagger en Heroku: https://quasar-operation-challenge.herokuapp.com/swagger-ui.html
 
-✔ AWS: http://ec2-18-228-173-196.sa-east-1.compute.amazonaws.com:8080/swagger-ui.html
+✔ Swagger en AWS: http://ec2-18-228-173-196.sa-east-1.compute.amazonaws.com:8080/swagger-ui.html
+
+✔ Colección Postman para importar: https://drive.google.com/file/d/1v4oxPD4VvKDfi5AWB_9EA8kZxdg2Xtbl/view?usp=sharing
 
 ### Servicios - EndPoints
 #### ✔ POST /topscret
@@ -73,7 +75,7 @@ http://ec2-18-228-173-196.sa-east-1.compute.amazonaws.com:8080/topsecret
       {
           "satellites": [
               {
-                  "name": "kenobii",
+                  "name": "kenobi",
                   "distance": 110.0,
                   "message": ["este", "", "", "mensaje", ""]
               },
@@ -244,3 +246,4 @@ El proyecto cuenta con pruebas unitarias de los services y el controller, estas 
 ● Tratamiento de errores: Se hicieron las respectivas validaciones para tratar los posibles errores y si hay algún error no esperado se maneja con la Exceepcion ResponseStatusException respondiendo un código 404
 
 ● Test limpios: El funcionamiento del código de los métodos principales del servicio fue validado mediante pruebas unitarias
+
