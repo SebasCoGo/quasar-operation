@@ -12,7 +12,7 @@
 
 ✔ IDE: IntelliJ
 
-✔ Principales librerías o dependencias: com.lemmingapex.trilateration,  io.springfox, junit, mockito
+✔ Principales librerías o dependencias: com.lemmingapex.trilateration, io.springfox, JPA, junit, mockito
 
 ## Ramas del proyecto
 ✔ main: Rama con la configuración para desplegar en AWS y Local usando BD MySQL
